@@ -15,7 +15,18 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "Cleaned datasets"
+
+
+def _find_file(candidates: list[str]) -> Path:
+    folders = ["Cleaned datasets", "data", "Raw data"]
+    for folder in folders:
+        for fname in candidates:
+            p = BASE_DIR / folder / fname
+            if p.exists():
+                return p
+    return BASE_DIR / "Cleaned datasets" / candidates[0]
 
 
 # --------------------------------------------------------------------------- #
@@ -25,20 +36,20 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 def load_raw_tables() -> dict[str, pd.DataFrame]:
     """Read every cleaned CSV extract into memory once and cache the result."""
     files = {
-        "dim_dates": "dim_dates_cleaned.csv",
-        "dim_disease": "dim_disease_cleaned.csv",
-        "dim_program": "dim_program_cleaned.csv",
-        "dim_source": "dim_source_cleaned.csv",
-        "dim_state": "dim_state_cleaned.csv",
-        "fact_outbreak": "fact_outbreak_cleaned.csv",
-        "fact_surveillance": "fact_disease_surveillance_cleaned.csv",
-        "fact_environmental": "fact_environmental_cleaned.csv",
-        "fact_health_programs": "fact_health_programs_cleaned.csv",
-        "fact_lab_healthcare": "fact_lab_healthcare_cleaned.csv",
+        "dim_dates": ["dim_dates_cleaned.csv", "dim_dates.csv", "dim_date.csv"],
+        "dim_disease": ["dim_disease_cleaned.csv", "dim_disease.csv"],
+        "dim_program": ["dim_program_cleaned.csv", "dim_program.csv"],
+        "dim_source": ["dim_source_cleaned.csv", "dim_source.csv"],
+        "dim_state": ["dim_state_cleaned.csv", "dim_state.csv"],
+        "fact_outbreak": ["fact outbreak cleaned.csv", "fact_outbreak_cleaned.csv", "fact_outbreak.csv"],
+        "fact_surveillance": ["fact_disease_surveillance_cleaned.csv", "fact_disease_surveillance.csv"],
+        "fact_environmental": ["fact_environmental_cleaned.csv", "fact_environmental.csv"],
+        "fact_health_programs": ["fact_health_programs_cleaned.csv", "fact_health_programs.csv"],
+        "fact_lab_healthcare": ["fact_lab_healthcare_cleaned.csv", "fact_lab_healthcare.csv"],
     }
     tables = {}
-    for key, filename in files.items():
-        path = DATA_DIR / filename
+    for key, candidates in files.items():
+        path = _find_file(candidates)
         df = pd.read_csv(path)
         df.columns = [c.strip() for c in df.columns]
         tables[key] = df

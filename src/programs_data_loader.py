@@ -11,8 +11,8 @@ import pandas as pd
 import streamlit as st
 
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "Cleaned datasets"
 
 PROGRAMS_FILES = [
     "fact_health_programs.csv",
@@ -20,6 +20,33 @@ PROGRAMS_FILES = [
     "dim_state.csv",
     "dim_date.csv"
 ]
+
+PROGRAMS_FILES_MAP = {
+    "fact_health_programs.csv": ["fact_health_programs_cleaned.csv", "fact_health_programs.csv"],
+    "dim_program.csv": ["dim_program_cleaned.csv", "dim_program.csv"],
+    "dim_state.csv": ["dim_state_cleaned.csv", "dim_state.csv"],
+    "dim_date.csv": ["dim_dates_cleaned.csv", "dim_dates.csv", "dim_date.csv"],
+}
+
+
+def _find_file(candidates: list[str]) -> Path | None:
+    folders = ["Cleaned datasets", "data", "Raw data"]
+    for folder in folders:
+        for fname in candidates:
+            p = BASE_DIR / folder / fname
+            if p.exists():
+                return p
+    return None
+
+
+def missing_files(file_names):
+    """Return the names of any required CSV that cannot be found."""
+    missing = []
+    for fname in file_names:
+        candidates = PROGRAMS_FILES_MAP.get(fname, [fname])
+        if _find_file(candidates) is None:
+            missing.append(fname)
+    return missing
 
 
 # The dashboard uses friendly display names. The raw column names
@@ -62,15 +89,6 @@ PROGRAMS_NUMBER_COLUMNS = [
 ]
 
 
-def missing_files(file_names):
-    """Return the names of any required CSV that is not in data."""
-
-    return [
-        name for name in file_names
-        if not (DATA_DIR / name).exists()
-    ]
-
-
 @st.cache_data
 def get_programs_master():
     """Load, clean and join the health programs star schema.
@@ -79,10 +97,15 @@ def get_programs_master():
     negative count, and the number of exact duplicate fact rows.
     """
 
-    fact = pd.read_csv(DATA_DIR / "fact_health_programs.csv")
-    program = pd.read_csv(DATA_DIR / "dim_program.csv")
-    state = pd.read_csv(DATA_DIR / "dim_state.csv")
-    date = pd.read_csv(DATA_DIR / "dim_date.csv")
+    fact_path = _find_file(PROGRAMS_FILES_MAP["fact_health_programs.csv"])
+    program_path = _find_file(PROGRAMS_FILES_MAP["dim_program.csv"])
+    state_path = _find_file(PROGRAMS_FILES_MAP["dim_state.csv"])
+    date_path = _find_file(PROGRAMS_FILES_MAP["dim_date.csv"])
+
+    fact = pd.read_csv(fact_path)
+    program = pd.read_csv(program_path)
+    state = pd.read_csv(state_path)
+    date = pd.read_csv(date_path)
 
     # The raw fact file contains exact duplicate rows.
 
