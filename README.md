@@ -1,92 +1,155 @@
-# Public Health Analytics Dashboard
+# HealthSentinel: Healthcare Operations Intelligence Dashboard
 
-Streamlit multipage application presenting the Public Health Analytics dashboard suite from a single entry point, built on a star-schema data model (dimension + fact CSV extracts).
+**HealthSentinel** is an enterprise-grade Public Health Analytics & Healthcare Operations Intelligence Dashboard built with Streamlit, Python, and Plotly. It provides decision-makers, public health officials, and researchers with actionable analytics derived from a robust star-schema data warehouse model.
 
-`app.py` links all 5 dashboards together with a single left-hand navigation menu (`st.navigation`), **Executive Public Health Overview** loading first by default.
+---
 
-| # | Dashboard                                  | Status                                                     |
-| - | ------------------------------------------ | ---------------------------------------------------------- |
-| 1 | Executive Public Health Overview           | ✅ Built — 2 tabs: Executive Summary + Disease Surveillance |
-| 2 | Geographic & Environmental Intelligence    | ⬜ Empty                                                    |
-| 3 | Laboratory & Healthcare Capacity           | ⬜ Empty                                                    |
-| 4 | Outbreak Monitoring & Forecasting          | ⬜ Empty                                                    |
-| 5 | Health Programs & Population Vulnerability | ⬜ Empty                                                    |
+## 🚀 Dashboard Suite Overview
 
-Disease Surveillance content (disease-wise trends, state heatmap, outbreak alerts, testing/positivity) now lives **inside** the Executive Public Health Overview page as its own tab, sharing the same sidebar filter panel as the Executive Summary tab — no separate nav entry, no duplicate filters.
+The application features a 7-page multi-page navigation structure wired via `st.navigation` in `app.py`:
 
-The four empty dashboards already have their data available through `src/data_loader.py` (one loader function per fact table: `get_outbreak_master()`, `get_environmental_master()`, `get_programs_master()`, `get_lab_master()`) — build the visuals directly on top of that, no data plumbing needed.
+| # | Page Name | Status | Key Features & Analytics |
+|---|---|---|---|
+| **0** | **Home** | ✅ Built | Hero introduction, executive summary highlights, quick navigation links, and system overview. |
+| **1** | **Executive Public Health Overview** | ✅ Built | Dual-tab dashboard (Executive Summary + Disease Surveillance), universal sidebar filters, KPI cards, case fatality rate (CFR) trends, state rankings, and risk scoring. |
+| **2** | **Geographic & Environmental Intelligence** | ✅ Built | Spatial heatmaps, Air Quality Index (AQI) tracking, rainfall analytics, sanitation scores, and environmental risk correlation with disease outbreaks. |
+| **3** | **Laboratory & Healthcare Capacity** | ✅ Built | Testing volumes, positivity rates, ICU and hospital bed occupancy metrics, lab efficiency, and vaccination coverage. |
+| **4** | **Outbreak Monitoring & Forecasting** | ✅ Built | Early warning outbreak detection, alert triggers, containment tracking, trend forecasting, and Decision Snapshots. |
+| **5** | **Health Programs & Population Vulnerability** | ✅ Built | Public health program reach, beneficiary coverage, vulnerability indexing, and urban vs. rural healthcare disparity analysis. |
+| **6** | **Upload & Custom Analysis** | ✅ Built | Ad-hoc CSV dataset upload, custom query engine, data quality inspection, and PDF/Excel report export. |
 
-## Project Structure
+---
+
+## 📁 Project Structure
 
 ```text
-dashboard/
-├── app.py                                              # Entry point — wires all 5 dashboards into one nav menu
-├── dashboards/
-│   ├── 0_Executive_Public_Health_Overview.py           # ✅ Built — 2 tabs: Executive Summary + Disease Surveillance
-│   ├── 1_Geographic_Environmental_Intelligence.py      # ⬜ Empty placeholder
-│   ├── 2_Laboratory_Healthcare_Capacity.py             # ⬜ Empty placeholder
-│   ├── 3_Outbreak_Monitoring_Forecasting.py            # ⬜ Empty placeholder
-│   └── 4_Health_Programs_Population_Vulnerability.py   # ⬜ Empty placeholder
-├── src/
-│   ├── data_loader.py             # Cached CSV loading + star-schema joins (all 5 fact tables ready)
-│   ├── filters.py                 # Shared sidebar filter panel
-│   ├── kpis.py                    # KPI calculation logic (unit-testable)
-│   └── styling.py                 # Shared CSS + reusable UI components
-├── data/                          # Cleaned CSV extracts (dim_*, fact_* )
+HealthSentinel/
+├── app.py                                                # Application entry point & multi-page navigation setup
+├── requirements.txt                                      # Python package dependencies
+├── .gitignore                                            # Git exclusion rules for bytecode, caches, & environments
+├── README.md                                             # Project documentation
 ├── .streamlit/
-│   └── config.toml                # Corporate theme configuration
-├── requirements.txt
-└── README.md
+│   └── config.toml                                      # Corporate visual theme configuration
+├── assets/                                               # Application branding logos & visual assets
+│   ├── home_hero.png
+│   ├── logo_full.png
+│   └── logo_icon.png
+├── dashboards/                                           # Multipage Streamlit dashboard views
+│   ├── 00_Home.py                                        # Landing page & suite introduction
+│   ├── 0_Executive_Public_Health_Overview.py             # Executive metrics & disease surveillance
+│   ├── 1_Geographic_Environmental_Intelligence.py        # Environmental & geographic risk analysis
+│   ├── 2_Laboratory_Healthcare_Capacity.py               # Lab testing & healthcare capacity metrics
+│   ├── 3_Outbreak_Monitoring_Forecasting.py              # Outbreak monitoring & predictive snapshots
+│   ├── 4_Health_Programs_Population_Vulnerability.py    # Health program coverage & population risk
+│   └── 5_Upload_Custom_Analysis.py                      # Custom file upload & interactive ad-hoc query
+├── src/                                                  # Core data processing & UI rendering modules
+│   ├── data_loader.py                                    # Primary cached CSV data loader & star-schema join engine
+│   ├── filters.py                                        # Universal sidebar filter panel component
+│   ├── geographic.py                                     # Map generation & spatial chart rendering helpers
+│   ├── kpis.py                                           # KPI calculation engine & statistical formulas
+│   ├── pdf_report.py                                     # Automated PDF report generation (ReportLab)
+│   ├── programs_data_loader.py                           # Dedicated data loader for health program metrics
+│   ├── programs_filters.py                              # Specialized filter controls for program views
+│   ├── programs_kpis.py                                 # Health program specific KPI logic
+│   ├── programs_styling.py                              # Visual styling utilities for health program views
+│   ├── report_generator.py                              # Comprehensive PDF & summary report compiler
+│   └── styling.py                                        # Global CSS stylesheet & custom HTML card components
+├── Cleaned datasets/                                     # Processed star-schema CSV tables
+│   ├── dim_dates_cleaned.csv                             # Date dimension table
+│   ├── dim_disease_cleaned.csv                           # Disease dimension table
+│   ├── dim_program_cleaned.csv                           # Public health program dimension table
+│   ├── dim_source_cleaned.csv                            # Data source dimension table
+│   ├── dim_state_cleaned.csv                            # Geographic state/region dimension table
+│   ├── fact outbreak cleaned.csv                         # Outbreak monitoring fact table
+│   ├── fact_disease_surveillance_cleaned.csv            # Disease surveillance fact table
+│   ├── fact_environmental_cleaned.csv                   # Environmental indicators fact table
+│   └── fact_lab_healthcare_cleaned.csv                  # Laboratory & healthcare capacity fact table
+├── Raw data/                                             # Original uncleaned raw data extracts
+├── Data Cleaning codes/                                  # Data preprocessing ETL scripts & notebooks
+└── EDA/                                                  # Exploratory Data Analysis notebooks & statistical scripts
 ```
 
-> Note: the pages folder is named `dashboards/`, not `pages/` — Streamlit reserves the literal `pages/` folder name for its older auto-navigation feature, which conflicts with the `st.navigation` API used in `app.py`.
+---
 
-## Adding a New Dashboard Later
+## 📊 Data Model Architecture
 
-1. Drop a new file in `dashboards/`.
-2. Add one `st.Page("dashboards/your_file.py", title="Your Title")` line in `app.py` and include it in the list passed to `st.navigation([...])`.
+The core data model follows a **Star Schema** architecture, linking dimension lookup tables with granular fact tables:
 
-No other file needs to change.
+### Dimension Tables
+| Table | Grain | Key Columns |
+|---|---|---|
+| `dim_dates` | 1 row per month | `date_id`, `year`, `month_name`, `quarter` |
+| `dim_state` | 1 row per state | `state_id`, `state_name`, `region`, `population` |
+| `dim_disease` | 1 row per disease | `disease_id`, `disease_name`, `disease_category` |
+| `dim_source` | 1 row per reporting source | `source_id`, `source_name` |
+| `dim_program` | 1 row per health program | `program_id`, `program_name` |
 
-## Running Locally
+### Fact Tables
+| Table | Grain | Key Metrics & Measures |
+|---|---|---|
+| `fact_disease_surveillance` | State × Date × Disease × Source | Reported cases, active cases, recovered cases, deaths, CFR, recovery rate, risk score |
+| `fact_outbreak` | State × Date × Disease × Source | Outbreak alerts, warning level, containment rate, impacted population |
+| `fact_environmental` | State × Date | Air Quality Index (AQI), rainfall (mm), sanitation coverage, environmental risk index |
+| `fact_health_programs` | State × Date × Program | Program coverage %, beneficiaries reached, population vulnerability index |
+| `fact_lab_healthcare` | State × Date | Diagnostic tests conducted, positivity rate %, ICU bed occupancy, hospital beds, vaccination coverage |
 
-```bash
-cd dashboard
-pip install -r requirements.txt
-streamlit run app.py
-```
+---
 
-The app opens at `http://localhost:8501`. Use the left sidebar to switch between dashboards, and to filter by Region, State, Year, Month, Disease Type, Disease, and Primary Source (on dashboards that use `render_sidebar_filters()`).
+## 📐 Key KPI Definitions & Calculation Logic
 
-## Data Model
+| KPI | Formula / Calculation Method |
+|---|---|
+| **Total Population Under Surveillance** | $\sum \text{distinct(population\_under\_surveillance)}$ across filtered regions |
+| **Total Reported Cases** | $\sum \text{total\_reported\_cases}$ |
+| **Case Fatality Rate (CFR %)** | $\frac{\sum \text{deaths}}{\sum \text{total\_reported\_cases}} \times 100$ *(Aggregated ratio)* |
+| **Recovery Rate (%)** | $\frac{\sum \text{recovered\_cases}}{\sum \text{total\_reported\_cases}} \times 100$ *(Aggregated ratio)* |
+| **Positivity Rate (%)** | $\frac{\sum \text{positive\_tests}}{\sum \text{total\_tests}} \times 100$ |
+| **Public Health Risk Score** | Mean of `public_health_risk_score` weighted across filtered records |
 
-| Table                       | Grain                           | Key Columns                                      |
-| --------------------------- | ------------------------------- | ------------------------------------------------ |
-| `dim_dates`                 | 1 row per month                 | `date_id`, `year`, `month_name`, `quarter`       |
-| `dim_state`                 | 1 row per state                 | `state_id`, `state_name`, `region`, `population` |
-| `dim_disease`               | 1 row per disease               | `disease_id`, `disease_name`, `disease_category` |
-| `dim_source`                | 1 row per reporting source      | `source_id`, `source_name`                       |
-| `dim_program`               | 1 row per health program        | `program_id`, `program_name`                     |
-| `fact_disease_surveillance` | state × date × disease × source | cases, deaths, CFR, recovery rate, risk score    |
-| `fact_outbreak`             | state × date × disease × source | outbreak/alert/containment metrics               |
-| `fact_environmental`        | state × date                    | AQI, rainfall, sanitation, environmental risk    |
-| `fact_health_programs`      | state × date × program          | coverage, beneficiaries, vulnerability index     |
-| `fact_lab_healthcare`       | state × date                    | testing, positivity, vaccination, infrastructure |
+> **Note on Aggregation:** Percentage metrics (CFR, Recovery Rate, Positivity Rate) are recomputed from aggregated sums rather than averaged row-level percentages to prevent skewing and volume bias across states/diseases.
 
-## KPI Definitions (Executive Public Health Overview)
+---
 
-| KPI                                 | Formula                                                        |
-| ----------------------------------- | -------------------------------------------------------------- |
-| Total Population Under Surveillance | Sum of distinct `population_under_surveillance` per state/date |
-| Total Reported Cases                | Sum of `total_reported_cases`                                  |
-| Active Cases                        | Sum of `active_cases`                                          |
-| Recovered Cases                     | Sum of `recovered_cases`                                       |
-| Deaths (Monthly)                    | Sum of `deaths`                                                |
-| Case Fatality Rate                  | Deaths ÷ Total Reported Cases × 100                            |
-| Recovery Rate                       | Recovered ÷ Total Reported Cases × 100                         |
-| Public Health Risk Score            | Mean of `public_health_risk_score` across filtered records     |
+## 🛠️ Installation & Running Locally
 
-## Notes
+### Prerequisites
+* Python 3.10+ installed on your system.
 
-* Rates (CFR, Recovery Rate, Hospitalization/ICU Rate) are **recomputed from aggregated totals** rather than averaged row-level percentages, to avoid bias when aggregating across states/diseases of very different case volume.
-* Conditional formatting on the State Ranking table uses `pandas.Styler` background gradients (Cases → Blue, CFR → Red, Recovery Rate → Green).
+### Steps
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/NanubalaSravani/Development-of-a-Healthcare-Operations-Intelligence-Dashboard-with-Decision-Analytics-Group-2.git
+   cd Development-of-a-Healthcare-Operations-Intelligence-Dashboard-with-Decision-Analytics-Group-2
+   ```
+
+2. **Set Up Virtual Environment (Recommended):**
+   ```bash
+   python -m venv venv
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   source venv/bin/activate
+   ```
+
+3. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Launch the Streamlit Application:**
+   ```bash
+   streamlit run app.py
+   ```
+
+5. **Access Dashboard:**
+   Open your browser and navigate to `http://localhost:8501`.
+
+---
+
+## 💡 Key Architectural Highlights
+
+* **Single Entry Point Multipage Navigation:** Built using Streamlit's `st.navigation` and `st.Page` API for seamless sidebar switching without reloading state.
+* **Unified High-Contrast Plotly Theme:** Configured custom Plotly templates in `app.py` forcing all chart text, axes, tick marks, and legends to crisp black `#000000` text for maximum legibility.
+* **Modular Codebase:** Business logic, KPI calculations, styling, and data loading are cleanly separated into the `src/` directory.
+* **Automated PDF Reporting:** Built-in PDF generation engine using `reportlab` allows users to export executive summaries and dashboard snapshots directly.
