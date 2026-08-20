@@ -94,20 +94,18 @@ The core data model follows a **Star Schema** architecture, linking dimension lo
 | `fact_lab_healthcare` | State × Date | Diagnostic tests conducted, positivity rate %, ICU bed occupancy, hospital beds, vaccination coverage |
 
 ---
-
 ## 📐 Key KPI Definitions & Calculation Logic
 
 | KPI | Formula / Calculation Method |
 |---|---|
-| **Total Population Under Surveillance** | $\sum \text{distinct(population\_under\_surveillance)}$ across filtered regions |
+| **Total Population Under Surveillance** | $\sum \text{population\_under\_surveillance}$ for unique filtered regions |
 | **Total Reported Cases** | $\sum \text{total\_reported\_cases}$ |
 | **Case Fatality Rate (CFR %)** | $\frac{\sum \text{deaths}}{\sum \text{total\_reported\_cases}} \times 100$ *(Aggregated ratio)* |
 | **Recovery Rate (%)** | $\frac{\sum \text{recovered\_cases}}{\sum \text{total\_reported\_cases}} \times 100$ *(Aggregated ratio)* |
 | **Positivity Rate (%)** | $\frac{\sum \text{positive\_tests}}{\sum \text{total\_tests}} \times 100$ |
-| **Public Health Risk Score** | Mean of `public_health_risk_score` weighted across filtered records |
+| **Public Health Risk Score** | Mean of `public_health_risk_score` across filtered records |
 
-> **Note on Aggregation:** Percentage metrics (CFR, Recovery Rate, Positivity Rate) are recomputed from aggregated sums rather than averaged row-level percentages to prevent skewing and volume bias across states/diseases.
-
+> **Note on Aggregation:** Percentage metrics (CFR, Recovery Rate, and Positivity Rate) are recomputed from aggregated sums rather than averaged row-level percentages to prevent skewing and volume bias across states/diseases.
 ---
 
 ## 🛠️ Installation & Running Locally
